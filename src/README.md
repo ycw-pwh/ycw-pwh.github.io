@@ -4,9 +4,9 @@ layout: Blog
 icon: house
 title: ycw的存钱罐
 heroImage: /logo.png
-heroText: 你博客的名称
+heroText: ycw的存钱罐
 heroFullScreen: true
-tagline: 你可以在这里放置你的口号与标语
+tagline: 努力努力加油加油
 projects:
   - icon: folder-open
     name: 项目名称
