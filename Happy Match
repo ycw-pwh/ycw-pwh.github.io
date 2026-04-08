@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>开心消消乐</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            touch-action: manipulation; /* 禁用双击放大等默认行为 */
+            -webkit-tap-highlight-color: transparent;
+        }
+        .candy-cell {
+            transition: transform 0.2s ease-in-out, background-color 0.2s;
+        }
+        .candy-pop {
+            animation: pop 0.3s ease-out forwards;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+            100% { transform: scale(0); opacity: 0; }
+        }
+        /* 隐藏滚动条 */
+        ::-webkit-scrollbar {
+            display: none;
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-b from-green-400 to-blue-500 min-h-screen text-white font-sans selection:bg-transparent flex flex-col items-center">
+
+    <!-- 主菜单 / 选关界面 -->
+    <div id="menu-screen" class="w-full max-w-md p-6 flex flex-col items-center h-screen overflow-y-auto pt-12 pb-12">
+        <h1 class="text-4xl font-extrabold mb-8 drop-shadow-lg text-center tracking-wider">🐾 开心消消乐 🐾</h1>
+        <div class="bg-white/20 p-4 rounded-xl w-full shadow-lg backdrop-blur-sm">
+            <h2 class="text-xl font-bold mb-4 text-center">选择关卡</h2>
+            <div id="level-grid" class="grid grid-cols-5 gap-3">
+                <!-- 关卡按钮由 JS 动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 游戏界面 -->
+    <div id="game-screen" class="w-full max-w-md p-4 flex flex-col h-screen hidden">
+        <!-- 游戏顶部信息 -->
+        <div class="flex justify-between items-center mb-4 bg-white/20 p-3 rounded-xl shadow backdrop-blur-sm">
+            <button onclick="showMenu()" class="bg-blue-600 hover:bg-blue-500 px-3 py-1 rounded shadow text-sm font-bold transition">返回</button>
+            <div class="text-center">
+                <div class="text-sm font-bold opacity-80">第 <span id="ui-level" class="text-yellow-300 text-lg">1</span> 关</div>
+            </div>
+            <div class="text-right">
+                <div class="text-xs opacity-80">目标分</div>
+                <div id="ui-target" class="font-bold text-yellow-300">1000</div>
+            </div>
+        </div>
+
+        <!-- 分数与步数面板 -->
+        <div class="flex justify-between items-center mb-4 px-2">
+            <div class="flex flex-col">
+                <span class="text-sm font-bold opacity-80 drop-shadow">当前分数</span>
+                <span id="ui-score" class="text-3xl font-extrabold drop-shadow-md text-white tracking-wider">0</span>
+            </div>
+            <div class="flex flex-col items-end">
+                <span class="text-sm font-bold opacity-80 drop-shadow">剩余步数</span>
+                <span id="ui-moves" class="text-4xl font-extrabold drop-shadow-md text-red-200">20</span>
+            </div>
+        </div>
+
+        <!-- 游戏网格 -->
+        <div class="flex-grow flex items-center justify-center w-full">
+            <div id="grid" class="grid grid-cols-8 gap-1 bg-black/30 p-2 rounded-2xl w-full aspect-square shadow-2xl relative">
+                <!-- 单元格由 JS 动态生成 -->
+            </div>
+        </div>
+    </div>
+
+    <!-- 结果弹窗 (Win/Lose) -->
+    <div id="result-modal" class="fixed inset-0 bg-black/60 backdrop-blur-sm hidden flex items-center justify-center z-50">
+        <div class="bg-white text-gray-800 p-8 rounded-2xl shadow-2xl max-w-sm w-full mx-4 text-center transform scale-95 transition-transform duration-300">
+            <h2 id="modal-title" class="text-3xl font-extrabold mb-2 text-green-600">恭喜过关!</h2>
+            <p id="modal-msg" class="text-gray-600 mb-6 font-medium">你成功达到了目标分数。</p>
+            <div class="flex justify-center space-x-4">
+                <button onclick="showMenu()" class="px-5 py-2 bg-gray-200 hover:bg-gray-300 rounded-lg font-bold transition">返回菜单</button>
+                <button id="modal-next-btn" onclick="nextLevel()" class="px-5 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg font-bold shadow-lg transition">下一关</button>
+                <button id="modal-retry-btn" onclick="retryLevel()" class="px-5 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold shadow-lg transition hidden">重试</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 游戏配置与状态 ---
+        const ROWS = 8;
+        const COLS = 8;
+        // 使用动物 Emoji 替代糖果
+        const ANIMAL_TYPES = ['🐸', '🐻', '🐥', '🦊', '🐷', '🐼']; 
+        
+        let levels = [];
+        let currentLevelObj = null;
+        let board = [];
+        let score = 0;
+        let moves = 0;
+        let selectedCell = null;
+        let isAnimating = false; // 防止动画期间点击
+        let unlockedLevels = 1;
+
+        // --- 初始化关卡数据 (30关) ---
+        function generateLevels() {
+            levels = [];
+            for (let i = 1; i <= 30; i++) {
+                levels.push({
+                    level: i,
+                    // 目标分数每关增加 300
+                    targetScore: 1000 + (i - 1) * 300,
+                    // 步数前10关25步，之后逐渐减少，最低12步
+                    moves: Math.max(12, 25 - Math.floor((i - 1) / 3)),
+                    // 动物种类：前5关4种，6-15关5种，16关以后6种全开 (种类越多越难消除)
+                    colors: i <= 5 ? 4 : (i <= 15 ? 5 : 6)
+                });
+            }
+        }
+
+        // --- 界面切换 ---
+        function showMenu() {
+            document.getElementById('game-screen').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+            document.getElementById('menu-screen').classList.remove('hidden');
+            renderLevelMenu();
+        }
+
+        function showGame() {
+            document.getElementById('menu-screen').classList.add('hidden');
+            document.getElementById('result-modal').classList.add('hidden');
+            document.getElementById('game-screen').classList.remove('hidden');
+        }
+
+        // --- 渲染选关菜单 ---
+        function renderLevelMenu() {
+            const grid = document.getElementById('level-grid');
+            grid.innerHTML = '';
+            levels.forEach(l => {
+                const btn = document.createElement('button');
+                const isUnlocked = l.level <= unlockedLevels;
+                
+                btn.className = `w-full aspect-square rounded-lg font-bold text-lg flex items-center justify-center shadow-md transition-transform duration-200 ${
+                    isUnlocked 
+                    ? 'bg-gradient-to-br from-green-300 to-green-500 hover:scale-105 hover:shadow-lg text-white' 
+                    : 'bg-white/10 text-white/40 cursor-not-allowed'
+                }`;
+                btn.innerText = l.level;
+                
+                if (isUnlocked) {
+                    btn.onclick = () => startLevel(l.level);
+                }
+                grid.appendChild(btn);
+            });
+        }
+
+        // --- 游戏核心逻辑 ---
+
+        function startLevel(levelNum) {
+            currentLevelObj = levels[levelNum - 1];
+            score = 0;
+            moves = currentLevelObj.moves;
+            selectedCell = null;
+            isAnimating = false;
+            
+            initBoard();
+            updateUI();
+            showGame();
+            renderBoard();
+        }
+
+        function initBoard() {
+            board = [];
+            const numColors = currentLevelObj.colors;
+            for (let r = 0; r < ROWS; r++) {
+                board[r] = [];
+                for (let c = 0; c < COLS; c++) {
+                    board[r][c] = getRandomAnimal(r, c, numColors);
+                }
+            }
+        }
+
+        // 获取随机动物，并确保初始状态没有连续3个相同的
+        function getRandomAnimal(r, c, numColors) {
+            const availableTypes = ANIMAL_TYPES.slice(0, numColors);
+            let validTypes = availableTypes.filter(type => {
+                // 检查左边两个
+                if (c >= 2 && board[r][c-1] === type && board[r][c-2] === type) return false;
+                // 检查上面两个
+                if (r >= 2 && board[r-1][c] === type && board[r-2][c] === type) return false;
+                return true;
+            });
+            // 如果碰巧过滤完了（极小概率），兜底用全部
+            if (validTypes.length === 0) validTypes = availableTypes;
+            return validTypes[Math.floor(Math.random() * validTypes.length)];
+        }
+
+        function renderBoard() {
+            const grid = document.getElementById('grid');
+            grid.innerHTML = '';
+            
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS; c++) {
+                    const cell = document.createElement('div');
+                    cell.className = 'candy-cell flex items-center justify-center bg-white/20 rounded-xl cursor-pointer text-3xl select-none shadow-sm';
+                    // 触控支持
+                    cell.onclick = () => handleCellClick(r, c);
+                    
+                    // 被选中的高亮样式
+                    if (selectedCell && selectedCell.r === r && selectedCell.c === c) {
+                        cell.classList.add('ring-4', 'ring-yellow-400', 'bg-white/40', 'scale-110', 'z-10');
+                    }
+                    
+                    const animal = board[r][c];
+                    if (animal) {
+                        // 如果有内容，包装在一个span中方便做消除动画
+                        const icon = document.createElement('span');
+                        icon.innerText = animal;
+                        icon.className = 'drop-shadow-md pointer-events-none';
+                        icon.id = `icon-${r}-${c}`;
+                        cell.appendChild(icon);
+                    } else {
+                        // 空格样式
+                        cell.classList.replace('bg-white/20', 'bg-black/10');
+                        cell.classList.remove('shadow-sm');
+                    }
+                    grid.appendChild(cell);
+                }
+            }
+        }
+
+        function updateUI() {
+            document.getElementById('ui-level').innerText = currentLevelObj.level;
+            document.getElementById('ui-target').innerText = currentLevelObj.targetScore;
+            
+            // 分数动画效果
+            const scoreEl = document.getElementById('ui-score');
+            const currentDisplayedScore = parseInt(scoreEl.innerText);
+            if (currentDisplayedScore !== score) {
+                scoreEl.innerText = score;
+                scoreEl.classList.add('text-yellow-300', 'scale-125');
+                setTimeout(() => scoreEl.classList.remove('text-yellow-300', 'scale-125'), 300);
+            }
+
+            document.getElementById('ui-moves').innerText = moves;
+        }
+
+        // --- 交互逻辑 ---
+        async function handleCellClick(r, c) {
+            if (isAnimating) return;
+
+            if (!selectedCell) {
+                // 选择第一个方块
+                selectedCell = { r, c };
+                renderBoard();
+            } else {
+                // 点击了第二个方块
+                const dr = Math.abs(selectedCell.r - r);
+                const dc = Math.abs(selectedCell.c - c);
+                
+                // 检查是否相邻
+                if ((dr === 1 && dc === 0) || (dr === 0 && dc === 1)) {
+                    isAnimating = true; // 锁定交互
+                    
+                    // 交换
+                    await swapData(selectedCell.r, selectedCell.c, r, c);
+                    
+                    // 检查匹配
+                    let matches = findMatches();
+                    
+                    if (matches.length > 0) {
+                        // 扣除步数
+                        moves--;
+                        updateUI();
+                        selectedCell = null;
+                        
+                        // 开始处理消除和下落的循环
+                        await processMatches();
+                    } else {
+                        // 没有匹配，换回来
+                        await swapData(r, c, selectedCell.r, selectedCell.c);
+                        selectedCell = null;
+                        isAnimating = false;
+                        renderBoard();
+                    }
+                } else {
+                    // 点击的不是相邻方块，更新选择
+                    selectedCell = { r, c };
+                    renderBoard();
+                }
+            }
+        }
+
+        // 逻辑层交换并渲染
+        async function swapData(r1, c1, r2, c2) {
+            const temp = board[r1][c1];
+            board[r1][c1] = board[r2][c2];
+            board[r2][c2] = temp;
+            renderBoard();
+            await sleep(200); // 视觉停顿
+        }
+
+        // 查找所有匹配
+        function findMatches() {
+            let matchedSet = new Set();
+            
+            // 水平检查
+            for (let r = 0; r < ROWS; r++) {
+                for (let c = 0; c < COLS - 2; c++) {
+                    let type = board[r][c];
+                    if (!type) continue;
+                    
+                    if (type === board[r][c+1] && type === board[r][c+2]) {
+                        matchedSet.add(`${r},${c}`);
+                        matchedSet.add(`${r},${c+1}`);
+                        matchedSet.add(`${r},${c+2}`);
+                        // 检查更长的连线
+                        let k = 3;
+                        while (c + k < COLS && board[r][c+k] === type) {
+                            matchedSet.add(`${r},${c+k}`);
+                            k++;
+                        }
+                    }
+                }
+            }
+            
+            // 垂直检查
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r < ROWS - 2; r++) {
+                    let type = board[r][c];
+                    if (!type) continue;
+                    
+                    if (type === board[r+1][c] && type === board[r+2][c]) {
+                        matchedSet.add(`${r},${c}`);
+                        matchedSet.add(`${r+1},${c}`);
+                        matchedSet.add(`${r+2},${c}`);
+                        let k = 3;
+                        while (r + k < ROWS && board[r+k][c] === type) {
+                            matchedSet.add(`${r+k},${c}`);
+                            k++;
+                        }
+                    }
+                }
+            }
+            
+            return Array.from(matchedSet).map(str => {
+                const parts = str.split(',');
+                return { r: parseInt(parts[0]), c: parseInt(parts[1]) };
+            });
+        }
+
+        // 核心消除与下落循环
+        async function processMatches() {
+            let hasMoreMatches = true;
+            
+            while (hasMoreMatches) {
+                const matches = findMatches();
+                if (matches.length === 0) {
+                    hasMoreMatches = false;
+                    break;
+                }
+
+                // 播放消除动画 (添加类名)
+                matches.forEach(m => {
+                    const icon = document.getElementById(`icon-${m.r}-${m.c}`);
+                    if(icon) icon.classList.add('candy-pop');
+                });
+                
+                await sleep(300); // 等待弹出动画
+
+                // 移除数据计算分数
+                // 基础分数：每个方块10分。连消加成通过总数计算。
+                let points = matches.length * 10;
+                if(matches.length > 3) points += (matches.length - 3) * 20; // 连消奖励
+                score += points;
+                updateUI();
+
+                matches.forEach(m => {
+                    board[m.r][m.c] = null;
+                });
+                renderBoard();
+                
+                await sleep(100);
+
+                // 执行重力下落
+                applyGravity();
+                renderBoard();
+                await sleep(250);
+
+                // 顶部生成新动物
+                refillBoard();
+                renderBoard();
+                await sleep(250);
+                
+                // 循环继续，自动触发下一次查找 (连消)
+            }
+
+            // 本回合动画结束，检查游戏状态
+            checkGameState();
+            isAnimating = false;
+        }
+
+        function applyGravity() {
+            for (let c = 0; c < COLS; c++) {
+                // 从下往上扫描
+                let emptySpaces = 0;
+                for (let r = ROWS - 1; r >= 0; r--) {
+                    if (board[r][c] === null) {
+                        emptySpaces++;
+                    } else if (emptySpaces > 0) {
+                        // 移动到下方的空位
+                        board[r + emptySpaces][c] = board[r][c];
+                        board[r][c] = null;
+                    }
+                }
+            }
+        }
+
+        function refillBoard() {
+            const numColors = currentLevelObj.colors;
+            for (let c = 0; c < COLS; c++) {
+                for (let r = 0; r < ROWS; r++) {
+                    if (board[r][c] === null) {
+                        board[r][c] = ANIMAL_TYPES[Math.floor(Math.random() * numColors)];
+                    }
+                }
+            }
+        }
+
+        // 检查输赢
+        function checkGameState() {
+            if (score >= currentLevelObj.targetScore) {
+                // 胜利
+                setTimeout(() => {
+                    if (currentLevelObj.level === unlockedLevels) {
+                        unlockedLevels++;
+                    }
+                    showResultModal(true);
+                }, 300);
+            } else if (moves <= 0) {
+                // 失败
+                setTimeout(() => {
+                    showResultModal(false);
+                }, 300);
+            }
+        }
+
+        // --- 弹窗与控制 ---
+        function showResultModal(isWin) {
+            const modal = document.getElementById('result-modal');
+            const title = document.getElementById('modal-title');
+            const msg = document.getElementById('modal-msg');
+            const nextBtn = document.getElementById('modal-next-btn');
+            const retryBtn = document.getElementById('modal-retry-btn');
+
+            modal.classList.remove('hidden');
+
+            if (isWin) {
+                title.innerText = '✨ 闯关成功 ✨';
+                title.className = 'text-3xl font-extrabold mb-2 text-green-500';
+                msg.innerHTML = `太棒了！<br>你获得了 <span class="text-xl font-bold text-yellow-500">${score}</span> 分`;
+                
+                if (currentLevelObj.level >= 30) {
+                    nextBtn.classList.add('hidden');
+                    msg.innerHTML += '<br><b>你已通关所有关卡！</b>';
+                } else {
+                    nextBtn.classList.remove('hidden');
+                }
+                retryBtn.classList.add('hidden');
+            } else {
+                title.innerText = '💔 闯关失败 💔';
+                title.className = 'text-3xl font-extrabold mb-2 text-red-500';
+                msg.innerHTML = `步数用尽啦。<br>离目标还差 <span class="text-xl font-bold text-red-500">${currentLevelObj.targetScore - score}</span> 分`;
+                nextBtn.classList.add('hidden');
+                retryBtn.classList.remove('hidden');
+            }
+        }
+
+        function nextLevel() {
+            document.getElementById('result-modal').classList.add('hidden');
+            startLevel(currentLevelObj.level + 1);
+        }
+
+        function retryLevel() {
+            document.getElementById('result-modal').classList.add('hidden');
+            startLevel(currentLevelObj.level);
+        }
+
+        // --- 工具函数 ---
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+
+        // --- 启动应用 ---
+        generateLevels();
+        renderLevelMenu();
+
+    </script>
+</body>
+</html>
