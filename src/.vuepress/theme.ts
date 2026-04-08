@@ -122,55 +122,11 @@ export default hopeTheme({
     tabs: true,
     tasklist: true,
     vPre: true,
-
-    // 取消注释它们如果你需要 TeX 支持
-    // math: {
-    //   // 启用前安装 katex
-    //   type: "katex",
-    //   // 或者安装 @mathjax/src
-    //   type: "mathjax",
-    // },
-
-    // 如果你需要幻灯片，安装 @vuepress/plugin-revealjs 并取消下方注释
-    // revealjs: {
-    //   plugins: ["highlight", "math", "search", "notes", "zoom"],
-    // },
-
-    // 在启用之前安装 chart.js
-    // chartjs: true,
-
-    // insert component easily
-
-    // 在启用之前安装 echarts
-    // echarts: true,
-
-    // 在启用之前安装 flowchart.ts
-    // flowchart: true,
-
-    // 在启用之前安装 mermaid
-    // mermaid: true,
-
-    // playground: {
-    //   presets: ["ts", "vue"],
-    // },
-
-    // 在启用之前安装 @vue/repl
-    // vuePlayground: true,
-
-    // 在启用之前安装 sandpack-vue3
-    // sandpack: true,
   },
 
   // 在这里配置主题提供的插件
   plugins: {
     blog: true,
-
-    // 启用之前需安装 @waline/client
-    // 警告: 这是一个仅供演示的测试服务，在生产环境中请自行部署并使用自己的服务！
-    // comment: {
-    //   provider: "Waline",
-    //   serverURL: "https://waline-comment.vuejs.press",
-    // },
 
     components: {
       components: ["Badge", "VPCard"],
@@ -179,62 +135,14 @@ export default hopeTheme({
     icon: {
       prefix: "fa6-solid:",
     },
-
-    // 如果你需要 PWA。安装 @vuepress/plugin-pwa 并取消下方注释
-    // pwa: {
-    //   favicon: "/favicon.ico",
-    //   cacheHTML: true,
-    //   cacheImage: true,
-    //   appendBase: true,
-    //   apple: {
-    //     icon: "/assets/icon/apple-icon-152.png",
-    //     statusBarColor: "black",
-    //   },
-    //   msTile: {
-    //     image: "/assets/icon/ms-icon-144.png",
-    //     color: "#ffffff",
-    //   },
-    //   manifest: {
-    //     icons: [
-    //       {
-    //         src: "/assets/icon/chrome-mask-512.png",
-    //         sizes: "512x512",
-    //         purpose: "maskable",
-    //         type: "image/png",
-    //       },
-    //       {
-    //         src: "/assets/icon/chrome-mask-192.png",
-    //         sizes: "192x192",
-    //         purpose: "maskable",
-    //         type: "image/png",
-    //       },
-    //       {
-    //         src: "/assets/icon/chrome-512.png",
-    //         sizes: "512x512",
-    //         type: "image/png",
-    //       },
-    //       {
-    //         src: "/assets/icon/chrome-192.png",
-    //         sizes: "192x192",
-    //         type: "image/png",
-    //       },
-    //     ],
-    //     shortcuts: [
-    //       {
-    //         name: "Demo",
-    //         short_name: "Demo",
-    //         url: "/demo/",
-    //         icons: [
-    //           {
-    //             src: "/assets/icon/guide-maskable.png",
-    //             sizes: "192x192",
-    //             purpose: "maskable",
-    //             type: "image/png",
-    //           },
-    //         ],
-    //       },
-    //     ],
-    //   },
-    // },
   },
+
+  // ======================
+  // 在这里加首页背景配置
+  // ======================
+  hero: {
+    background: "/background.png",
+    fullScreen: true,
+    mask: 0.4
+  }
 });
