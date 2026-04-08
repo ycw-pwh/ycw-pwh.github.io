@@ -1,1 +1,33 @@
 // place your custom styles here
+// ==============================================
+// 首页 Hero 标题 & 副标题 字体自定义
+// ==============================================
+
+// 主标题：
+.home-hero__title {
+  // 字体优先级：英文优先Playfair Display，中文优先思源宋体，兜底系统字体
+  font-family: "Playfair Display", "Noto Serif SC", "PingFang SC", "Microsoft YaHei", serif;
+  // 半粗：标题不厚重，更文艺
+  font-weight: 600;
+  // 适配移动端的黄金大小
+  font-size: 2.8rem;
+  // 行高舒展，不拥挤
+  line-height: 1.25;
+  // 字间距增加，高级感拉满
+  letter-spacing: 0.05em;
+  // 温柔深灰，不刺眼
+  color: #2d3748;
+}
+
+//副标题：
+.home-hero__subtitle {
+  font-family: "Noto Serif SC", "PingFang SC", serif;
+  // 常规粗细，更柔和
+  font-weight: 400;
+  // 副标题大小，和主标题层次分明
+  font-size: 1.2rem;
+  // 更大字间距，文艺感拉满
+  letter-spacing: 0.08em;
+  // 浅灰，不抢主标题风头
+  color: #4a5568;
+}

@@ -2,11 +2,11 @@
 home: true
 layout: Blog
 icon: house
-title: ycw的存钱罐
-heroImage: /logo.png
-heroText: ycw的存钱罐
+title: Curious Wisdom,Worthy Heights
+heroImage: /logo2.png
+heroText: Curious Wisdom,Worthy Heights
 heroFullScreen: true
-tagline: 努力努力加油加油
+tagline: 以知为光,向远而行
 projects:
   - icon: folder-open
     name: 项目名称
