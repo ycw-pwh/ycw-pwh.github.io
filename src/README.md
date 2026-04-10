@@ -2,7 +2,7 @@
 home: true
 layout: Blog
 icon: house
-title: ycw的博客
+title: ycw的学习博客
 heroImage: /logo2.png
 heroText: Curious Wisdom,Worthy Heights
 heroFullScreen: true
