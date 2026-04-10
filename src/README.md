@@ -7,6 +7,7 @@ heroImage: /logo2.png
 heroText: Curious Wisdom,Worthy Heights
 heroFullScreen: true
 tagline: 以知为光,向远而行
+bgImage: /background.png
 projects:
   - icon: folder-open
     name: 项目名称
