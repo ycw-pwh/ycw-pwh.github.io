@@ -1,52 +1,40 @@
 import { navbar } from "vuepress-theme-hope";
 
 export default navbar([
-  "/",
-  "/demo/",
   {
-    text: "博文",
-    icon: "pen-to-square",
-    prefix: "/posts/",
+    text: "开始",
+    icon: "blog",
+    link: "/"
+  },
+  //无嵌套菜单
+  {
+    text: "测试",
+    icon: "blog",
     children: [
-      {
-        text: "苹果",
-        icon: "pen-to-square",
-        prefix: "apple/",
-        children: [
-          { text: "苹果1", icon: "pen-to-square", link: "1" },
-          { text: "苹果2", icon: "pen-to-square", link: "2" },
-          "3",
-          "4",
-        ],
-      },
-      {
-        text: "香蕉",
-        icon: "pen-to-square",
-        prefix: "banana/",
-        children: [
-          {
-            text: "香蕉 1",
-            icon: "pen-to-square",
-            link: "1",
-          },
-          {
-            text: "香蕉 2",
-            icon: "pen-to-square",
-            link: "2",
-          },
-          "3",
-          "4",
-        ],
-      },
-      { text: "樱桃", icon: "pen-to-square", link: "cherry" },
-      { text: "火龙果", icon: "pen-to-square", link: "dragonfruit" },
-      "tomato",
-      "strawberry",
+      {text: "intro",icon: "blog",link: "/intro.md"},
+      {text: "Happy Match",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
     ],
   },
+  //基础多菜单
   {
-    text: "V2 文档",
-    icon: "book",
-    link: "https://theme-hope.vuejs.press/zh/",
+    text: "分组菜单",
+    icon: "blog",
+    children: [
+      {
+        text: "分组1",
+        children:[
+          {text: "intro",icon: "blog",link: "/intro.md"},
+          {text: "Happy Match",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
+        ]
+      },
+      {
+        text:"分组2",
+        children:[
+          {text: "disable",icon: "blog",link: "/demo/disable.md"},
+          {text: "encrypt",icon: "blog",link: "/demo/encrypt.md"},
+        ]
+      }
+    ],
   },
+  //嵌套菜单
 ]);
