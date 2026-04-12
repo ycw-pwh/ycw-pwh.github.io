@@ -8,28 +8,25 @@ export default defineUserConfig({
   title: "Curious Wisdom,Worthy Heights",
   description: "以知为光,向远而行",
 
-  // 引入文艺字体（中英文完美适配）
-  head: [
-    // 中文：思源宋体 Noto Serif SC（文艺优雅）
-    [
-      "link",
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;700&display=swap",
-      },
-    ],
-    // 英文：Playfair Display（高级衬线体，搭配你的英文标题）
-    [
-      "link",
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&display=swap",
-      },
-    ],
-  ],
-
   theme,
+  head:[
+    ["link",{rel:"icon",href:"/favcion.ico"}],//href 改成自己的图标路径
+  ],
+  //网站简介，说明
+  locales:{
+    "/":{
+      lang: "zh-CN",
+      title: "Curious Wisdom,Worthy Heights",
+      description: "以知为光,向远而行",
+    }
+  },
 
   // 和 PWA 一起启用
   // shouldPrefetch: false,
+  //主题渲染的大纲级别
+  markdown:{
+    headers:{
+      level:[2,3,4,5,6],
+    }
+  }
 });

@@ -9,7 +9,7 @@ export default navbar([
   //无嵌套菜单
   {
     text: "测试",
-    icon: "blog",
+    icon: "blogger",
     children: [
       {text: "intro",icon: "blog",link: "/intro.md"},
       {text: "Happy Match",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
