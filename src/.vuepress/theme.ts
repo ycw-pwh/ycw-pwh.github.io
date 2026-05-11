@@ -123,6 +123,42 @@ export default hopeTheme({
     tabs: true,
     tasklist: true,
     vPre: true,
+       // 取消注释它们如果你需要 TeX 支持
+    // math: {
+    //   // 启用前安装 katex
+    //   type: "katex",
+    //   // 或者安装 @mathjax/src
+    //   type: "mathjax",
+    // },
+
+    // 如果你需要幻灯片，安装 @vuepress/plugin-revealjs 并取消下方注释
+    // revealjs: {
+    //   plugins: ["highlight", "math", "search", "notes", "zoom"],
+    // },
+
+    // 在启用之前安装 chart.js
+    // chartjs: true,
+
+    // insert component easily
+
+    // 在启用之前安装 echarts
+    // echarts: true,
+
+    // 在启用之前安装 flowchart.ts
+    // flowchart: true,
+
+    // 在启用之前安装 mermaid
+    // mermaid: true,
+
+    // playground: {
+    //   presets: ["ts", "vue"],
+    // },
+
+    // 在启用之前安装 @vue/repl
+    // vuePlayground: true,
+
+    // 在启用之前安装 sandpack-vue3
+    // sandpack: true,
   },
 
   // 在这里配置主题提供的插件
@@ -137,5 +173,20 @@ export default hopeTheme({
       prefix: "iconfont icon-",
       assets:"//at.alicdn.com/t/c/font_5158902_vlk44jas78.css"//你生成图标的项目链接
     },
+    slimsearch:{
+      hotKeys:[],
+      //你的选项
+      indexContent: true,
+      suggestion: true,
+      queryHistoryCount: 5,
+      resultHistoryCount: 5,
+      sortStrategy:'max',
+      hotReload:false,
+      locales:{
+        "/":{
+          placeholder:"搜索",
+        }
+      }
+    }
   },
 });
