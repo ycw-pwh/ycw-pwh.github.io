@@ -8,11 +8,11 @@ export default navbar([
   },
   //无嵌套菜单
   {
-    text: "测试",
+    text: "放松一下吧",
     icon: "blogger",
     children: [
-      {text: "intro",icon: "blog",link: "/intro.md"},
-      {text: "Happy Match",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
+      {text: "贪吃蛇",icon: "blog",link: "https://ycw-pwh.com/贪吃蛇.html"},
+      {text: "开心消消乐",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
     ],
   },
   //基础多菜单
