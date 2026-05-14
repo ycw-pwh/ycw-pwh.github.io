@@ -11,7 +11,7 @@ export default navbar([
     text: "放松一下吧",
     icon: "blogger",
     children: [
-      {text: "贪吃蛇",icon: "blog",link: "https://ycw-pwh.com/snake.html"},
+      {text: "贪吃蛇",icon: "blog",link: "https://ycw-pwh.com/贪吃蛇.html"},
       {text: "开心消消乐",icon: "blog",link: "https://ycw-pwh.com/HappyMatch.html"},
     ],
   },
